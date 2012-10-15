@@ -25,7 +25,7 @@ typedef struct TMTGAImageSpecification {
     unsigned short height;
     byte pixelDepth;
     byte imageDescriptor;
-} TMTGAColorMapSpecification;
+} TMTGAImageSpecification;
 
 typedef struct TMTGAHeader {
     byte idLength;
