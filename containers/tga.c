@@ -1,7 +1,9 @@
 #include "containers.h"
 #include "utils.h"
+#include "libtex.h"
+#include <stdio.h>
 
-TMContainer tm_tga_container = {
+TMContainerType tmTgaContainer = {
 	.name = "tga",
 	.longname = "Truevision TGA (TARGA)",
 	.mime_types = "image/x-targa,image/x-tga",
@@ -59,6 +61,73 @@ typedef struct TMTGAExtensionArea {
 	byte attributesType;
 }
 
+typedef enum TMTGASubFormat {
+	TMTGAOldFormat,
+	TMTGANewFormat
+} TMTGASubFormat;
+
 char tmTgaValidateFooter(TMTGAFooter footer) {
-	return strncmp(signature, "TRUEVISION-XFILE.", 18) == 0;
+	return strncmp(footer.signature, "TRUEVISION-XFILE.", 18) == 0;
+}
+
+TMTextureCollection *tmTgaRead(FILE *inStream) {
+	TMTGAHeader header;
+	TMTGAFooter footer;
+	TMTGASubFormat subFormat;
+	TextureCollection *ret;
+	TMSequence *seq;
+	TMTexture *tex;
+	size_t read;
+	char isNewFormat;
+
+	read = fread(&header, sizeof(TMTGAHeader), 1, inStream);
+	if (read != 1) {
+		fprintf(stderr, "Could not load header\n");
+		return NULL;
+	}
+	
+	fseek(inStream, 26, SEEK_END);
+	read = fread(&footer, sizeof(TMTGAFooter), 1, inStream);
+	if (read != 1) {
+		fprintf(stderr, "Could not load footer\n");
+		return NULL;
+	}
+	
+	if (tmTgaValidateFooter(TMTGAFooter footer)) {
+		subFormat = TMTGANewFormat;
+	}
+	else {
+		subFormat = TMTGAOldFormat;
+	}
+		
+	ret = (*tmDefaultAllocator.malloc)(sizeof(TextureCollection));
+	memset(ret, 0, sizeof(TextureCollection));
+	switch (header.imageType) {
+		case 0:
+			// no image data
+			// TODO: Try to do postage stamp anyway
+			return ret;
+		case ￼1:
+		case 9:
+			￼fprintf(stderr, "Color-mapped images not supported\n");
+			return NULL;
+		case ￼2:
+			￼
+			break;
+		default:
+			￼fprintf(stderr, "Unknown image type, %d\n", header.imageType);
+			return NULL;
+			break;
+	}
+	ret->sequences = malloc(sizeof(void*));
+	ret->sequences[0] = seq;
+	ret->sequenceCount = 1;
+
+	// postage stamp
+	if (subFormat == TMTGANewFormat && footer.postageStampOffset != 0) {
+		// TODO
+	}
+	else {
+		ret->thumbnail = NULL;
+	}
 }

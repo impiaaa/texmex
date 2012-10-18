@@ -1,0 +1,70 @@
+==Roadmap==
+
+0.1:
+Read/write TGA
+Read DDS
+Convert DXT1 to RGB565
+Convert DXT1 to RGBA8888 (more accurate)
+Convert RGB565 to RGB888
+
+0.2:
+Write DDS
+Read/write VTF
+Convert DXT2/3 to RGBA8888
+Convert DXT4/5 to RGBA8888
+
+0.3:
+Convert RGB565 to DXT1
+
+0.4:
+Convert RGBA8888 to DXT1
+Convert RGBA8888 to DXT2/3
+Convert RGBA8888 to DXT4/5
+
+0.5:
+Other pixfmts
+
+0.6:
+Scaling/filters/generate mipmaps/thumbnails
+
+0.7:
+Read/write PVR container
+Convert PVRTC to pixfmt (?)
+
+0.8:
+Convert pixfmt (?) to PVRTC
+
+0.9:
+Pathfinding for automatic conversion
+
+1.0:
+Tests
+
+1.1:
+Read/write Maxis Raster (and others)
+Read/write Nintendo BTI, JPA, and others
+
+1.2:
+Rotation
+Flips
+
+2.0:
+OpenGL GPU support for loading (converting?) textures
+
+2.1:
+OpenGL GPU support for transformations
+
+Future or unknown timeframe:
+OpenCL and/or threading support, other optimizations
+HDR
+Non-linear colorspace (sRGB)
+Cubemap/spheremap/envmap generation
+External library usage (libtxc_dxtn, NVidia utils, DevIL, …)
+Other compression schemes (3Dc, ASTC, ETC, FXT1, S2TC, …)
+Bunches of filters
+Dithering
+Paletted images
+Normal map generation from bumpmap
+DirectX support
+Color transformations
+GUI

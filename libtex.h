@@ -1,8 +1,17 @@
 #ifndef LIBTEX_H
 #define LIBTEX_H
 
-typedef struct Texture {
-	int codecId;
+#include <stdlib.h>
+
+typedef struct TMContainerType {
+	const char *name;
+	const char *longname;
+	const char *mime_types; // comma-separated
+	const char *extensions; // comma-separated
+} TMContainerType;
+
+typedef struct TMTexture {
+	id codecId;
 	unsigned short width;
 	unsigned short height;
 	unsigned short depth; // 3D textures use 2D slices
@@ -10,10 +19,10 @@ typedef struct Texture {
 	short yOffset;
 	short zOffset;
 	unsigned char mipmapCount;
-	void *mipmaps; // Each mipmap contains (depth) slices, and then the 2D image is codec-dependent. Data is contiguous.
-} Texture;
+	void *mipmaps; // Each mipmap contains (mipmap depth) slices, and then the 2D image is codec-dependent. Data is contiguous. Width, height, and depth decrease by a power of two each time.
+} TMTexture;
 
-typedef struct Sequence {
+typedef struct TMSequence {
 	unsigned short frameCount; // 0 for non-animations
 	unsigned short startFrame;
 	Texture **frames;
@@ -22,14 +31,31 @@ typedef struct Sequence {
 	double *delays;
 	unsigned int globalFpsNumerator;
 	unsigned int globalFpsDenominator;
-} Sequence;
+} TMSequence;
 
-typedef struct TextureCollection {
+typedef struct TMTextureCollection {
 	// to be loaded from a file
-	Texture *thumbnail; // set to NULL for no thumbnail
+	TMTexture *thumbnail; // set to NULL for no thumbnail
 	unsigned short sequenceCount; // some files have multiple textures, or faces for a cubemap
-	Sequence **sequences;
+	TMSequence **sequences;
+} TMTextureCollection;
+
+typedef struct TMAllocator {
+	void * (*calloc)(size_t, size_t);
+	void (*free)(void *);
+	void * (*malloc)(size_t);
+	void * (*realloc)(void *, size_t);
+	void * (*reallocf)(void *, size_t);
+	void * (*valloc)(size_t);
+} TMAllocator;
+
+TMAllocator tmDefaultAllocator = {
+	.calloc = &calloc;
+	.free = &free;
+	.malloc = &malloc;
+	.realloc = &realloc;
+	.reallocf = &reallocf;
+	.valloc = &valloc;
 }
-TextureCollection;
 
 #endif
