@@ -105,21 +105,21 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 	switch (header.imageType) {
 		case 0:
 			// no image data
-			// TODO: Try to do postage stamp anyway
 			return ret;
-		case ￼1:
+		case 1:
 		case 9:
-			￼fprintf(stderr, "Color-mapped images not supported\n");
+			fprintf(stderr, "Color-mapped images not supported\n");
+			(*tmDefaultAllocator.free)(ret);
 			return NULL;
-		case ￼2:
-			￼
+		case 2:
+			
 			break;
 		default:
-			￼fprintf(stderr, "Unknown image type, %d\n", header.imageType);
+			fprintf(stderr, "Unknown image type, %d\n", header.imageType);
+			(*tmDefaultAllocator.free)(ret);
 			return NULL;
-			break;
 	}
-	ret->sequences = malloc(sizeof(void*));
+	ret->sequences = (*tmDefaultAllocator.malloc)(sizeof(void*));
 	ret->sequences[0] = seq;
 	ret->sequenceCount = 1;
 
@@ -130,4 +130,6 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 	else {
 		ret->thumbnail = NULL;
 	}
+	
+	return ret;
 }
