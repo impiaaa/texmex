@@ -38,8 +38,8 @@ typedef struct __attribute__((packed)) TMTGAHeader {
 } TMTGAHeader;
 
 typedef struct __attribute__((packed)) TMTGAFooter {
-	long extensionAreaOffset;
-	long developerDirectoryOffset;
+	int extensionAreaOffset;
+	int developerDirectoryOffset;
 	char signature[18];
 } TMTGAFooter;
 

@@ -46,8 +46,6 @@ typedef struct TMAllocator {
 	void (*free)(void *);
 	void * (*malloc)(size_t);
 	void * (*realloc)(void *, size_t);
-	void * (*reallocf)(void *, size_t);
-	void * (*valloc)(size_t);
 } TMAllocator;
 
 TMAllocator tmDefaultAllocator;

@@ -71,6 +71,8 @@ int main (int argc, char **argv) {
 			return 1;
 		}
 		TMTextureCollection *tc = tmTgaRead(inFile);
+		if (tc == NULL)
+			continue;
 		printf("Sequence count: %d\n", tc->sequenceCount);
 		for (j = 0; j < tc->sequenceCount; j++) {
 			printf("  Frame count: %d\n", tc->sequences[j]->frameCount);
