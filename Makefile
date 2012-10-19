@@ -7,7 +7,7 @@ BINOBJ=$(BINSRC:.c=.o)
 BINOUT=texmex
 
 # C compiler flags (-g -O2 -Wall)
-CFLAGS=-g -O0 -Wall
+CFLAGS=-g -O2 -Wall
 
 # compiler
 CC=gcc

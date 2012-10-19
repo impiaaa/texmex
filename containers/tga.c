@@ -14,13 +14,13 @@ TMContainerType tmTgaContainer = {
 
 // http://www.dca.fee.unicamp.br/~martino/disciplinas/ea978/tgaffs.pdf
 
-typedef struct TMTGAColorMapSpecification {
+typedef struct __attribute__((packed)) TMTGAColorMapSpecification {
 	unsigned short firstEntryIndex;
 	unsigned short colorMapLength;
 	byte colorMapEntrySize;
 } TMTGAColorMapSpecification;
 
-typedef struct TMTGAImageSpecification {
+typedef struct __attribute__((packed)) TMTGAImageSpecification {
 	short xOrigin; // from lower-left
 	short yOrigin;
 	unsigned short width;
@@ -29,7 +29,7 @@ typedef struct TMTGAImageSpecification {
 	byte imageDescriptor;
 } TMTGAImageSpecification;
 
-typedef struct TMTGAHeader {
+typedef struct __attribute__((packed)) TMTGAHeader {
 	byte idLength;
 	byte colorMapType;
 	byte imageType;
@@ -37,13 +37,13 @@ typedef struct TMTGAHeader {
 	TMTGAImageSpecification imageSpecification;
 } TMTGAHeader;
 
-typedef struct TMTGAFooter {
+typedef struct __attribute__((packed)) TMTGAFooter {
 	long extensionAreaOffset;
 	long developerDirectoryOffset;
 	char signature[18];
 } TMTGAFooter;
 
-typedef struct TMTGAExtensionArea {
+typedef struct __attribute__((packed)) TMTGAExtensionArea {
 	short extensionSize;
 	char authorName[41];
 	char authorComments[324];
