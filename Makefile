@@ -1,4 +1,4 @@
-LIBSRC=$(wildcard codecs/*.c containers/*.c libtex.c)
+LIBSRC=$(wildcard codecs/*.c containers/*.c libtex.c utils.c)
 LIBOBJ=$(LIBSRC:.c=.o)
 LIBOUT=libtex.a
 
@@ -7,7 +7,7 @@ BINOBJ=$(BINSRC:.c=.o)
 BINOUT=texmex
 
 # C compiler flags (-g -O2 -Wall)
-CFLAGS=-g -O2 -Wall
+CFLAGS=-g -O0 -Wall
 
 # compiler
 CC=gcc

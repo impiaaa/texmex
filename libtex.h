@@ -2,6 +2,7 @@
 #define LIBTEX_H
 
 #include <stdlib.h>
+#include "codecs/codecs.h"
 
 typedef struct TMContainerType {
 	const char *name;
@@ -11,13 +12,13 @@ typedef struct TMContainerType {
 } TMContainerType;
 
 typedef struct TMTexture {
-	id codecId;
+	TMCodecType codec;
 	unsigned short width;
 	unsigned short height;
 	unsigned short depth; // 3D textures use 2D slices
-	short xOffset;
+	short xOffset; // from upper-left
 	short yOffset;
-	short zOffset;
+	short zOffset; // from starting slice
 	unsigned char mipmapCount;
 	void *mipmaps; // Each mipmap contains (mipmap depth) slices, and then the 2D image is codec-dependent. Data is contiguous. Width, height, and depth decrease by a power of two each time.
 } TMTexture;
@@ -25,7 +26,7 @@ typedef struct TMTexture {
 typedef struct TMSequence {
 	unsigned short frameCount; // 0 for non-animations
 	unsigned short startFrame;
-	Texture **frames;
+	TMTexture **frames;
 	// All formats I've seen either have per-frame delays or a global FPS.
 	// In the case of global FPS, set delays to NULL.
 	double *delays;
@@ -49,13 +50,6 @@ typedef struct TMAllocator {
 	void * (*valloc)(size_t);
 } TMAllocator;
 
-TMAllocator tmDefaultAllocator = {
-	.calloc = &calloc;
-	.free = &free;
-	.malloc = &malloc;
-	.realloc = &realloc;
-	.reallocf = &reallocf;
-	.valloc = &valloc;
-}
+TMAllocator tmDefaultAllocator;
 
 #endif

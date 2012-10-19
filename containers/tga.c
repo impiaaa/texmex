@@ -1,7 +1,7 @@
 #include "containers.h"
-#include "utils.h"
-#include "libtex.h"
+#include "../libtex.h"
 #include <stdio.h>
+#include <string.h>
 
 TMContainerType tmTgaContainer = {
 	.name = "tga",
@@ -21,7 +21,7 @@ typedef struct TMTGAColorMapSpecification {
 } TMTGAColorMapSpecification;
 
 typedef struct TMTGAImageSpecification {
-	short xOrigin;
+	short xOrigin; // from lower-left
 	short yOrigin;
 	unsigned short width;
 	unsigned short height;
@@ -40,26 +40,26 @@ typedef struct TMTGAHeader {
 typedef struct TMTGAFooter {
 	long extensionAreaOffset;
 	long developerDirectoryOffset;
-	char[18] signature;
+	char signature[18];
 } TMTGAFooter;
 
 typedef struct TMTGAExtensionArea {
 	short extensionSize;
-	char[41] authorName;
-	char[324] authorComments;
-	short[6] dateTimeStamp;
-	char[41] jobNameId;
-	short[3] jobTime;
-	char[41] softwareId;
-	byte[3] softwareVersion;
+	char authorName[41];
+	char authorComments[324];
+	short dateTimeStamp[6];
+	char jobNameId[41];
+	short jobTime[3];
+	char softwareId[41];
+	byte softwareVersion[3];
 	long keyColor;
-	short[2] pixelAspectRatio;
-	short[2] gammaValue;
+	short pixelAspectRatio[2];
+	short gammaValue[2];
 	long colorCorrectionOffset;
 	long postageStampOffset;
 	long scanLineOffset;
 	byte attributesType;
-}
+} TMTGAExtensionArea;
 
 typedef enum TMTGASubFormat {
 	TMTGAOldFormat,
@@ -74,7 +74,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 	TMTGAHeader header;
 	TMTGAFooter footer;
 	TMTGASubFormat subFormat;
-	TextureCollection *ret;
+	TMTextureCollection *ret;
 	TMSequence *seq;
 	TMTexture *tex;
 	size_t read;
@@ -86,22 +86,23 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 		return NULL;
 	}
 	
-	fseek(inStream, 26, SEEK_END);
+	fseek(inStream, -sizeof(TMTGAFooter), SEEK_END);
 	read = fread(&footer, sizeof(TMTGAFooter), 1, inStream);
 	if (read != 1) {
 		fprintf(stderr, "Could not load footer\n");
 		return NULL;
 	}
 	
-	if (tmTgaValidateFooter(TMTGAFooter footer)) {
+	if (tmTgaValidateFooter(footer)) {
 		subFormat = TMTGANewFormat;
 	}
 	else {
 		subFormat = TMTGAOldFormat;
 	}
 		
-	ret = (*tmDefaultAllocator.malloc)(sizeof(TextureCollection));
-	memset(ret, 0, sizeof(TextureCollection));
+	ret = (*tmDefaultAllocator.malloc)(sizeof(TMTextureCollection));
+	memset(ret, 0, sizeof(TMTextureCollection));
+	char isCompressed, isGray;
 	switch (header.imageType) {
 		case 0:
 			// no image data
@@ -112,24 +113,61 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 			(*tmDefaultAllocator.free)(ret);
 			return NULL;
 		case 2:
-			
+			isCompressed = 0;
+			isGray = 0;
+			break;
+		case 3:
+			isCompressed = 0;
+			isGray = 1;
+			break;
+		case 10:
+			isCompressed = 1;
+			isGray = 0;
+			break;
+		case 11:
+			isCompressed = 1;
+			isGray = 1;
 			break;
 		default:
 			fprintf(stderr, "Unknown image type, %d\n", header.imageType);
 			(*tmDefaultAllocator.free)(ret);
 			return NULL;
 	}
+	seq = (*tmDefaultAllocator.malloc)(sizeof(TMSequence));
 	ret->sequences = (*tmDefaultAllocator.malloc)(sizeof(void*));
 	ret->sequences[0] = seq;
 	ret->sequenceCount = 1;
-
-	// postage stamp
-	if (subFormat == TMTGANewFormat && footer.postageStampOffset != 0) {
-		// TODO
-	}
-	else {
-		ret->thumbnail = NULL;
-	}
 	
+	tex = (*tmDefaultAllocator.malloc)(sizeof(TMTexture));
+	seq->frameCount = 0;
+	seq->startFrame = 0;
+	seq->frames = (*tmDefaultAllocator.malloc)(sizeof(void*));
+	seq->frames[0] = tex;
+	
+	//tex->codec = ;
+	tex->width = header.imageSpecification.width;
+	tex->height = header.imageSpecification.height;
+	tex->depth = 1;
+	tex->xOffset = header.imageSpecification.xOrigin;
+	tex->yOffset = tex->height-header.imageSpecification.yOrigin;
+	tex->zOffset = 0;
+	tex->mipmapCount = 1;
+	
+	if (subFormat == TMTGANewFormat && footer.extensionAreaOffset != 0) {
+		TMTGAExtensionArea ext;
+		fseek(inStream, footer.extensionAreaOffset, 0);
+		read = fread(&ext, sizeof(TMTGAExtensionArea), 1, inStream);
+		if (read != 1) {
+			fprintf(stderr, "Could not load extension area\n");
+			return NULL;
+		}
+		// postage stamp
+		if (ext.postageStampOffset != 0) {
+			// TODO
+		}
+		else {
+			ret->thumbnail = NULL;
+		}
+	}
 	return ret;
 }
