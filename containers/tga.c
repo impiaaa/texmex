@@ -1,5 +1,7 @@
 #include "containers.h"
+#include "../compression/compression.h"
 #include "../libtex.h"
+#include "../pixfmts.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -78,7 +80,6 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 	TMSequence *seq;
 	TMTexture *tex;
 	size_t read;
-	char isNewFormat;
 
 	read = fread(&header, sizeof(TMTGAHeader), 1, inStream);
 	if (read != 1) {
@@ -102,7 +103,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 		
 	ret = (*tmDefaultAllocator.malloc)(sizeof(TMTextureCollection));
 	memset(ret, 0, sizeof(TMTextureCollection));
-	char isCompressed, isGray;
+	char isGray, isCompressed;
 	switch (header.imageType) {
 		case 0:
 			// no image data
@@ -144,7 +145,42 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 	seq->frames = (*tmDefaultAllocator.malloc)(sizeof(void*));
 	seq->frames[0] = tex;
 	
-	//tex->codec = ;
+	tex->compression = isCompressed ? RLE : TMNoCompression;
+	if (isGray) {
+		switch (header.imageSpecification.pixelDepth) {
+			case 4:
+				tex->pixfmt = I4;
+				break;
+			case 8:
+				tex->pixfmt = I8;
+				break;
+			default:
+				fprintf(stderr, "Grayscale not supported with pixel depth %d\n", header.imageSpecification.pixelDepth);
+				(*tmDefaultAllocator.free)(ret);
+				(*tmDefaultAllocator.free)(seq);
+				(*tmDefaultAllocator.free)(tex);
+				return NULL;
+		}
+	}
+	else {
+		switch (header.imageSpecification.pixelDepth) {
+			case 16:
+				tex->pixfmt = BGR565;
+				break;
+			case 24:
+				tex->pixfmt = BGR888;
+				break;
+			case 32:
+				tex->pixfmt = BGRA8888;
+				break;
+			default:
+				fprintf(stderr, "pixel depth %d not supported\n", header.imageSpecification.pixelDepth);
+				(*tmDefaultAllocator.free)(ret);
+				(*tmDefaultAllocator.free)(seq);
+				(*tmDefaultAllocator.free)(tex);
+				return NULL;
+		}
+	}
 	tex->width = header.imageSpecification.width;
 	tex->height = header.imageSpecification.height;
 	tex->depth = 1;
@@ -157,16 +193,18 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 		TMTGAExtensionArea ext;
 		fseek(inStream, footer.extensionAreaOffset, 0);
 		read = fread(&ext, sizeof(TMTGAExtensionArea), 1, inStream);
-		if (read != 1) {
-			fprintf(stderr, "Could not load extension area\n");
-			return NULL;
-		}
-		// postage stamp
-		if (ext.postageStampOffset != 0) {
-			// TODO
+		if (read == 1) {
+			// postage stamp
+			if (ext.postageStampOffset != 0) {
+				// TODO
+			}
+			else {
+				ret->thumbnail = NULL;
+			}
 		}
 		else {
 			ret->thumbnail = NULL;
+			fprintf(stderr, "Could not load extension area\n");
 		}
 	}
 	return ret;

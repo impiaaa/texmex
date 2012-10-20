@@ -78,7 +78,7 @@ int main (int argc, char **argv) {
 			printf("  Frame count: %d\n", tc->sequences[j]->frameCount);
 			for (k = 0; k < max(1, tc->sequences[j]->frameCount); k++) {
 				TMTexture *tex = tc->sequences[j]->frames[k];
-				printf("    Codec: %d\n    Width: %d\n    Height: %d\n    Depth: %d\n    mipmapCount: %d\n", tex->codec, tex->width, tex->height, tex->depth, tex->mipmapCount);
+				printf("    Compression: %08X\n    Pixel format: %d\n    Width: %d\n    Height: %d\n    Depth: %d\n    mipmapCount: %d\n", tex->compression, tex->pixfmt, tex->width, tex->height, tex->depth, tex->mipmapCount);
 			}
 		}
 	}

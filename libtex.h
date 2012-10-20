@@ -2,7 +2,8 @@
 #define LIBTEX_H
 
 #include <stdlib.h>
-#include "codecs/codecs.h"
+#include "pixfmts.h"
+#include "compression/compression.h"
 
 typedef struct TMContainerType {
 	const char *name;
@@ -12,7 +13,8 @@ typedef struct TMContainerType {
 } TMContainerType;
 
 typedef struct TMTexture {
-	TMCodecType codec;
+	TMCompressionType compression;
+	TMPixelFormat pixfmt;
 	unsigned short width;
 	unsigned short height;
 	unsigned short depth; // 3D textures use 2D slices
