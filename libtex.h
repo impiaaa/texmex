@@ -43,13 +43,9 @@ typedef struct TMTextureCollection {
 	TMSequence **sequences;
 } TMTextureCollection;
 
-typedef struct TMAllocator {
-	void * (*calloc)(size_t, size_t);
-	void (*free)(void *);
-	void * (*malloc)(size_t);
-	void * (*realloc)(void *, size_t);
-} TMAllocator;
-
-TMAllocator tmDefaultAllocator;
+#define TMCalloc calloc
+#define TMFree free
+#define TMMalloc malloc
+#define TMRealloc realloc
 
 #endif

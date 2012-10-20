@@ -101,7 +101,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 		subFormat = TMTGAOldFormat;
 	}
 		
-	ret = (*tmDefaultAllocator.malloc)(sizeof(TMTextureCollection));
+	ret = TMMalloc(sizeof(TMTextureCollection));
 	memset(ret, 0, sizeof(TMTextureCollection));
 	char isGray, isCompressed;
 	switch (header.imageType) {
@@ -111,7 +111,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 		case 1:
 		case 9:
 			fprintf(stderr, "Color-mapped images not supported\n");
-			(*tmDefaultAllocator.free)(ret);
+			TMFree(ret);
 			return NULL;
 		case 2:
 			isCompressed = 0;
@@ -131,18 +131,18 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 			break;
 		default:
 			fprintf(stderr, "Unknown image type, %d\n", header.imageType);
-			(*tmDefaultAllocator.free)(ret);
+			TMFree(ret);
 			return NULL;
 	}
-	seq = (*tmDefaultAllocator.malloc)(sizeof(TMSequence));
-	ret->sequences = (*tmDefaultAllocator.malloc)(sizeof(void*));
+	seq = TMMalloc(sizeof(TMSequence));
+	ret->sequences = TMMalloc(sizeof(void*));
 	ret->sequences[0] = seq;
 	ret->sequenceCount = 1;
 	
-	tex = (*tmDefaultAllocator.malloc)(sizeof(TMTexture));
+	tex = TMMalloc(sizeof(TMTexture));
 	seq->frameCount = 0;
 	seq->startFrame = 0;
-	seq->frames = (*tmDefaultAllocator.malloc)(sizeof(void*));
+	seq->frames = TMMalloc(sizeof(void*));
 	seq->frames[0] = tex;
 	
 	tex->compression = isCompressed ? RLE : TMNoCompression;
@@ -156,9 +156,9 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 				break;
 			default:
 				fprintf(stderr, "Grayscale not supported with pixel depth %d\n", header.imageSpecification.pixelDepth);
-				(*tmDefaultAllocator.free)(ret);
-				(*tmDefaultAllocator.free)(seq);
-				(*tmDefaultAllocator.free)(tex);
+				TMFree(ret);
+				TMFree(seq);
+				TMFree(tex);
 				return NULL;
 		}
 	}
@@ -175,9 +175,9 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 				break;
 			default:
 				fprintf(stderr, "pixel depth %d not supported\n", header.imageSpecification.pixelDepth);
-				(*tmDefaultAllocator.free)(ret);
-				(*tmDefaultAllocator.free)(seq);
-				(*tmDefaultAllocator.free)(tex);
+				TMFree(ret);
+				TMFree(seq);
+				TMFree(tex);
 				return NULL;
 		}
 	}
