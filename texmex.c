@@ -7,6 +7,7 @@
 char GlobalVerbosity = 0;
 
 TMTextureCollection *tmTgaRead(FILE *inStream);
+void tmTgaWrite(FILE *outStream, TMTextureCollection *collection);
 
 void usage(char *execname) {
 	fprintf(stderr, "Usage:\n"
@@ -73,13 +74,24 @@ int main (int argc, char **argv) {
 		TMTextureCollection *tc = tmTgaRead(inFile);
 		if (tc == NULL)
 			continue;
-		printf("Sequence count: %d\n", tc->sequenceCount);
+		printf("%s sequence count: %d\n", inFiles[i], tc->sequenceCount);
 		for (j = 0; j < tc->sequenceCount; j++) {
 			printf("  Frame count: %d\n", tc->sequences[j]->frameCount);
 			for (k = 0; k < max(1, tc->sequences[j]->frameCount); k++) {
 				TMTexture *tex = tc->sequences[j]->frames[k];
 				printf("    Compression: %08X\n    Pixel format: %d\n    Width: %d\n    Height: %d\n    Depth: %d\n    mipmapCount: %d\n", tex->compression, tex->pixfmt, tex->width, tex->height, tex->depth, tex->mipmapCount);
 			}
+		}
+		fclose(inFile);
+		
+		if (outFileIndex == 1) {
+			FILE *outFile = fopen(outFiles[0], "wb");
+			if (outFile == NULL) {
+				fprintf(stderr, "Error opening file: %s\n", outFiles[0]);
+				return 1;
+			}
+			tmTgaWrite(outFile, tc);
+			fclose(outFile);
 		}
 	}
 	return 0;

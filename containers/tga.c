@@ -139,10 +139,10 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 	ret->sequences[0] = seq;
 	ret->sequenceCount = 1;
 	
-	tex = TMMalloc(sizeof(TMTexture));
 	seq->frameCount = 0;
 	seq->startFrame = 0;
 	seq->frames = TMMalloc(sizeof(void*));
+	tex = TMMalloc(sizeof(TMTexture));
 	seq->frames[0] = tex;
 	
 	tex->compression = isCompressed ? RLE : TMNoCompression;
@@ -188,10 +188,14 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 	tex->yOffset = tex->height-header.imageSpecification.yOrigin;
 	tex->zOffset = 0;
 	tex->mipmapCount = 1;
+	unsigned long imageDataSize = (header.imageSpecification.width*header.imageSpecification.height*header.imageSpecification.pixelDepth)>>3;
+	tex->mipmaps = TMMalloc(imageDataSize);
+	fseek(inStream, sizeof(TMTGAHeader)+header.idLength+((header.colorMapSpecification.colorMapLength*header.colorMapSpecification.colorMapEntrySize)>>3), SEEK_SET);
+	read = fread(tex->mipmaps, imageDataSize, 1, inStream);
 	
 	if (subFormat == TMTGANewFormat && footer.extensionAreaOffset != 0) {
 		TMTGAExtensionArea ext;
-		fseek(inStream, footer.extensionAreaOffset, 0);
+		fseek(inStream, footer.extensionAreaOffset, SEEK_SET);
 		read = fread(&ext, sizeof(TMTGAExtensionArea), 1, inStream);
 		if (read == 1) {
 			// postage stamp
@@ -208,4 +212,66 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 		}
 	}
 	return ret;
+}
+
+void tmTgaWrite(FILE *outStream, TMTextureCollection *collection) {
+	TMTGAHeader header;
+	TMTGAFooter footer;
+	size_t wrote;
+	
+	header.idLength = 0;
+	header.colorMapType = 0;
+	if (collection->sequences[0]->frames[0]->pixfmt == I8 || collection->sequences[0]->frames[0]->pixfmt == I4) {
+		header.imageType = 3;
+	}
+	else if (collection->sequences[0]->frames[0]->pixfmt == BGR565 || collection->sequences[0]->frames[0]->pixfmt == BGR888 || collection->sequences[0]->frames[0]->pixfmt == BGRA8888) {
+		header.imageType = 2;
+	}
+	else {
+		fprintf(stderr, "Unsupported pixfmt %d\n", collection->sequences[0]->frames[0]->pixfmt);
+		return;
+	}
+	
+	header.colorMapSpecification.firstEntryIndex = 0;
+	header.colorMapSpecification.colorMapLength = 0;
+	header.colorMapSpecification.colorMapEntrySize = 0;
+	
+	header.imageSpecification.xOrigin = collection->sequences[0]->frames[0]->xOffset;
+	header.imageSpecification.yOrigin = collection->sequences[0]->frames[0]->height-collection->sequences[0]->frames[0]->yOffset;
+	header.imageSpecification.width = collection->sequences[0]->frames[0]->width;
+	header.imageSpecification.height = collection->sequences[0]->frames[0]->height;
+	switch (collection->sequences[0]->frames[0]->pixfmt) {
+		case I4:
+			header.imageSpecification.pixelDepth = 4;
+			break;
+		case I8:
+			header.imageSpecification.pixelDepth = 8;
+			break;
+		case BGR565:
+			header.imageSpecification.pixelDepth = 16;
+			break;
+		case BGR888:
+			header.imageSpecification.pixelDepth = 24;
+			break;
+		case BGRA8888:
+			header.imageSpecification.pixelDepth = 32;
+			break;
+		default:
+			fprintf(stderr, "Insane condition\n");
+			return;
+	}
+	header.imageSpecification.imageDescriptor = 0;
+	
+	wrote = fwrite(&header, sizeof(TMTGAHeader), 1, outStream);
+	if (wrote != 1) {
+		fprintf(stderr, "Could not write header\n");
+		return;
+	}
+	
+	unsigned long imageDataSize = (collection->sequences[0]->frames[0]->width*collection->sequences[0]->frames[0]->height*header.imageSpecification.pixelDepth)>>3;
+	wrote = fwrite(collection->sequences[0]->frames[0]->mipmaps, imageDataSize, 1, outStream);
+	if (wrote != 1) {
+		fprintf(stderr, "Could not write image data\n");
+		return;
+	}
 }
