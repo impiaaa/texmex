@@ -216,7 +216,6 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 
 void tmTgaWrite(FILE *outStream, TMTextureCollection *collection) {
 	TMTGAHeader header;
-	TMTGAFooter footer;
 	size_t wrote;
 	
 	header.idLength = 0;

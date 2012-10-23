@@ -3,6 +3,7 @@
 
 typedef enum TMPixelFormat {
 	TMPixelFormatNone,
+	A4,
 	A8,
 	ABGR8888,
 	ARGB8888,

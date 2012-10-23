@@ -5,6 +5,8 @@
 #include "pixfmts.h"
 #include "compression/compression.h"
 
+#define max(a, b) ((a < b) ? b : a)
+
 typedef struct TMContainerType {
 	const char *name;
 	const char *longname;
@@ -28,7 +30,7 @@ typedef struct TMTexture {
 typedef struct TMSequence {
 	unsigned short frameCount; // 0 for non-animations
 	unsigned short startFrame;
-	TMTexture **frames;
+	TMTexture **frames; // array of pointers
 	// All formats I've seen either have per-frame delays or a global FPS.
 	// In the case of global FPS, set delays to NULL.
 	double *delays;
@@ -40,7 +42,7 @@ typedef struct TMTextureCollection {
 	// to be loaded from a file
 	TMTexture *thumbnail; // set to NULL for no thumbnail
 	unsigned short sequenceCount; // some files have multiple textures, or faces for a cubemap
-	TMSequence **sequences;
+	TMSequence **sequences; // array of pointers
 } TMTextureCollection;
 
 #define TMCalloc calloc

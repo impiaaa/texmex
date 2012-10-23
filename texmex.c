@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-#define max(a, b) ((a < b) ? b : a)
 #include "libtex.h"
 
 char GlobalVerbosity = 0;
 
 TMTextureCollection *tmTgaRead(FILE *inStream);
 void tmTgaWrite(FILE *outStream, TMTextureCollection *collection);
+TMTextureCollection *tmDdsRead(FILE *inStream);
 
 void usage(char *execname) {
 	fprintf(stderr, "Usage:\n"
@@ -71,7 +71,7 @@ int main (int argc, char **argv) {
 			fprintf(stderr, "Error opening file: %s\n", inFiles[i]);
 			return 1;
 		}
-		TMTextureCollection *tc = tmTgaRead(inFile);
+		TMTextureCollection *tc = tmDdsRead(inFile);
 		if (tc == NULL)
 			continue;
 		printf("%s sequence count: %d\n", inFiles[i], tc->sequenceCount);

@@ -1,4 +1,4 @@
-LIBSRC=$(wildcard codecs/*.c containers/*.c *.c)
+LIBSRC=$(wildcard codecs/*.c containers/*.c pixfmts.c utils.c)
 LIBOBJ=$(LIBSRC:.c=.o)
 LIBOUT=libtex.a
 
