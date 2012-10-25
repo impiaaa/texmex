@@ -128,12 +128,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 				}
 				else {
 					fprintf(stderr, "Alpha+luminance bit width %d unsupported\n", header.pixelFormat.rgbBitCount);
-					TMFree(ret->sequences[i]->frames[0]);
-					TMFree(ret->sequences[i]->frames);
-					TMFree(ret->sequences[i]);
-					TMFree(ret->sequences);
-					TMFree(ret);
-					return NULL;
+					goto fail;
 				}
 			}
 			else {
@@ -147,12 +142,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 				}
 				else {
 					fprintf(stderr, "Alpha-only bit width %d unsupported\n", header.pixelFormat.rgbBitCount);
-					TMFree(ret->sequences[i]->frames[0]);
-					TMFree(ret->sequences[i]->frames);
-					TMFree(ret->sequences[i]);
-					TMFree(ret->sequences);
-					TMFree(ret);
-					return NULL;
+					goto fail;
 				}
 			}
 		}
@@ -163,32 +153,79 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 			}
 			else {
 				fprintf(stderr, "Unknown FOURCC 0x%08X\n", header.pixelFormat.fourCC);
-				TMFree(ret->sequences[i]->frames[0]);
-				TMFree(ret->sequences[i]->frames);
-				TMFree(ret->sequences[i]);
-				TMFree(ret->sequences);
-				TMFree(ret);
-				return NULL;
+				goto fail;
 			}
 		}
 		else if (header.pixelFormat.flags & TMDDS_RGB) {
 			if (header.pixelFormat.rgbBitCount == 16) {
-				
+				ret->sequences[i]->frames[0]->compression = TMNoCompression;
+				if ((header.pixelFormat.rBitMask == 0x001f) && (header.pixelFormat.gBitMask == 0x07e0) && (header.pixelFormat.bBitMask == 0xf800))
+					ret->sequences[i]->frames[0]->pixfmt = BGR565;
+				else if ((header.pixelFormat.rBitMask == 0x00f0) && (header.pixelFormat.gBitMask == 0x0f00) && (header.pixelFormat.bBitMask == 0xf000) && (header.pixelFormat.aBitMask == 0x000f))
+					ret->sequences[i]->frames[0]->pixfmt = BGRA4444;
+				else if ((header.pixelFormat.rBitMask == 0x003e) && (header.pixelFormat.gBitMask == 0x07c0) && (header.pixelFormat.bBitMask == 0xf800) && (header.pixelFormat.aBitMask == 0x0001))
+					ret->sequences[i]->frames[0]->pixfmt = BGRA5551;
+				else if ((header.pixelFormat.rBitMask == 0x003e) && (header.pixelFormat.gBitMask == 0x07c0) && (header.pixelFormat.bBitMask == 0xf800))
+					ret->sequences[i]->frames[0]->pixfmt = BGRX5551;
+				else if ((header.pixelFormat.rBitMask == 0xf800) && (header.pixelFormat.gBitMask == 0x07e0) && (header.pixelFormat.bBitMask == 0x001f))
+					ret->sequences[i]->frames[0]->pixfmt = RGB565;
+				else {
+					fprintf(stderr, "Unknown 16-bit color format 0x%04X, 0x%04X, 0x%04X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+					goto fail;
+				}
 			}
 			else if (header.pixelFormat.rgbBitCount == 24) {
-				
+				ret->sequences[i]->frames[0]->compression = TMNoCompression;
+				if ((header.pixelFormat.rBitMask == 0x0000ff) && (header.pixelFormat.gBitMask == 0x00ff00) && (header.pixelFormat.bBitMask == 0xff0000))
+					ret->sequences[i]->frames[0]->pixfmt = BGR888;
+				else if ((header.pixelFormat.rBitMask == 0xff0000) && (header.pixelFormat.gBitMask == 0x00ff00) && (header.pixelFormat.bBitMask == 0x0000ff))
+					ret->sequences[i]->frames[0]->pixfmt = RGB888;
+				else {
+					fprintf(stderr, "Unknown 24-bit color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+					goto fail;
+				}
 			}
 			else if (header.pixelFormat.rgbBitCount == 32) {
-				
+				ret->sequences[i]->frames[0]->compression = TMNoCompression;
+				if (header.pixelFormat.rBitMask == 0xff000000) {
+					if ((header.pixelFormat.gBitMask == 0x00ff0000) && (header.pixelFormat.bBitMask == 0x0000ff00) && (header.pixelFormat.aBitMask == 0x000000ff)) {
+						ret->sequences[i]->frames[0]->pixfmt = RGBA8888;
+					}
+					else {
+						fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+						goto fail;
+					}
+				}
+				else if (header.pixelFormat.bBitMask == 0xff000000) {
+					if ((header.pixelFormat.gBitMask == 0x00ff0000) && (header.pixelFormat.aBitMask == 0x0000ff00)) {
+						if (header.pixelFormat.aBitMask == 0x000000ff)
+							ret->sequences[i]->frames[0]->pixfmt = BGRA8888;
+						else
+							ret->sequences[i]->frames[0]->pixfmt = BGRX8888;
+					}
+					else {
+						fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+						goto fail;
+					}
+				}
+				else if (header.pixelFormat.aBitMask == 0xff000000) {
+					if ((header.pixelFormat.bBitMask == 0x00ff0000) && (header.pixelFormat.gBitMask == 0x0000ff00) && (header.pixelFormat.rBitMask == 0x000000ff))
+						ret->sequences[i]->frames[0]->pixfmt = ABGR8888;
+					else if ((header.pixelFormat.rBitMask == 0x00ff0000) && (header.pixelFormat.gBitMask == 0x0000ff00) && (header.pixelFormat.bBitMask == 0x000000ff))
+						ret->sequences[i]->frames[0]->pixfmt = ARGB8888;
+					else {
+						fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+						goto fail;
+					}
+				}
+				else {
+					fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+					goto fail;
+				}
 			}
 			else {
 				fprintf(stderr, "Unknown bit width %d\n", header.pixelFormat.rgbBitCount);
-				TMFree(ret->sequences[i]->frames[0]);
-				TMFree(ret->sequences[i]->frames);
-				TMFree(ret->sequences[i]);
-				TMFree(ret->sequences);
-				TMFree(ret);
-				return NULL;
+				goto fail;
 			}
 		}
 		else if (header.pixelFormat.flags & TMDDS_LUMINANCE) {
@@ -202,22 +239,12 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 			}
 			else {
 				fprintf(stderr, "Luminance bit width %d unsupported\n", header.pixelFormat.rgbBitCount);
-				TMFree(ret->sequences[i]->frames[0]);
-				TMFree(ret->sequences[i]->frames);
-				TMFree(ret->sequences[i]);
-				TMFree(ret->sequences);
-				TMFree(ret);
-				return NULL;
+				goto fail;
 			}
 		}
 		else {
 			fprintf(stderr, "Unknown pixel format 0x%08X\n", header.pixelFormat.flags);
-			TMFree(ret->sequences[i]->frames[0]);
-			TMFree(ret->sequences[i]->frames);
-			TMFree(ret->sequences[i]);
-			TMFree(ret->sequences);
-			TMFree(ret);
-			return NULL;
+			goto fail;
 		}
 		
 		ret->sequences[i]->frames[0]->width = header.width;
@@ -230,9 +257,33 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 		ret->sequences[i]->frames[0]->yOffset = 0;
 		ret->sequences[i]->frames[0]->mipmapCount = header.mipMapCount;
 		
-		unsigned long imageDataSize = ((max(1, ((header.width+3)/4)) * header.pixelFormat.rgbBitCount)/8)*header.height;
+		unsigned long imageDataMipSize, imageDataSize = 0;
+		if (header.pixelFormat.flags & TMDDS_FOURCC) {
+			imageDataMipSize = max(1, ((header.width+3)/4));
+			if (header.pixelFormat.fourCC == '1TXD')
+				imageDataMipSize *= 2;
+			else
+				imageDataMipSize *= 4;
+		}
+		else
+			imageDataMipSize = (header.width * header.pixelFormat.rgbBitCount + 7) / 8;
+		imageDataMipSize *= header.height;
+		
+		int mip;
+		for (mip = 0; mip < header.mipMapCount; mip++) {
+			imageDataSize += imageDataMipSize;
+			imageDataMipSize /= 4;
+		}
 		ret->sequences[i]->frames[0]->mipmaps = TMMalloc(imageDataSize);
+		memset(ret->sequences[i]->frames[0]->mipmaps, 0, imageDataSize);
 		fread(ret->sequences[i]->frames[0]->mipmaps, imageDataSize, 1, inStream);
 	}
 	return ret;
+fail:
+	TMFree(ret->sequences[i]->frames[0]);
+	TMFree(ret->sequences[i]->frames);
+	TMFree(ret->sequences[i]);
+	TMFree(ret->sequences);
+	TMFree(ret);
+	return NULL;
 }

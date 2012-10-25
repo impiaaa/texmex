@@ -8,6 +8,7 @@ char GlobalVerbosity = 0;
 TMTextureCollection *tmTgaRead(FILE *inStream);
 void tmTgaWrite(FILE *outStream, TMTextureCollection *collection);
 TMTextureCollection *tmDdsRead(FILE *inStream);
+char *DXT1AtoRGBA8888(unsigned char *dataIn, unsigned short width, unsigned short height);
 
 void usage(char *execname) {
 	fprintf(stderr, "Usage:\n"
@@ -85,6 +86,12 @@ int main (int argc, char **argv) {
 		fclose(inFile);
 		
 		if (outFileIndex == 1) {
+			char *dxtData = tc->sequences[0]->frames[0]->mipmaps;
+			char *expandData = DXT1AtoRGBA8888(dxtData, tc->sequences[0]->frames[0]->width, tc->sequences[0]->frames[0]->height);
+			free(dxtData);
+			tc->sequences[0]->frames[0]->mipmaps = expandData;
+			tc->sequences[0]->frames[0]->compression = TMNoCompression;
+			tc->sequences[0]->frames[0]->pixfmt = BGRA8888;
 			FILE *outFile = fopen(outFiles[0], "wb");
 			if (outFile == NULL) {
 				fprintf(stderr, "Error opening file: %s\n", outFiles[0]);
