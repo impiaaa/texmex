@@ -259,7 +259,7 @@ void tmTgaWrite(FILE *outStream, TMTextureCollection *collection) {
 			fprintf(stderr, "Insane condition\n");
 			return;
 	}
-	header.imageSpecification.imageDescriptor = 0;
+	header.imageSpecification.imageDescriptor = 0x28;
 	
 	wrote = fwrite(&header, sizeof(TMTGAHeader), 1, outStream);
 	if (wrote != 1) {
