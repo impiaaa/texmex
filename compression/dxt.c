@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "../libtex.h"
 
-uint16_t rgb565interp(uint16_t color0, uint16_t color1, char weight, char divisor) {
+uint16_t rgb565interp(uint16_t color0, uint16_t color1) {
 	char r, g, b;
 	char r0, g0, b0;
 	char r1, g1, b1;
@@ -12,13 +12,13 @@ uint16_t rgb565interp(uint16_t color0, uint16_t color1, char weight, char diviso
 	r1 = (color1 & 0xF800) >> 11;
 	g1 = (color1 & 0x07E0) >>  5;
 	b1 = (color1 & 0x001F);
-	r = (weight * r0 + r1) / divisor;
-	g = (weight * g0 + g1) / divisor;
-	b = (weight * b0 + b1) / divisor;
+	r = (2 * r0 + r1 + 1) / 3;
+	g = (2 * g0 + g1 + 1) / 3;
+	b = (2 * b0 + b1 + 1) / 3;
 	return (r << 11) | (g << 5) | (b);
 }
 
-uint32_t rgba8888interp(uint32_t color0, uint32_t color1, char weight, char divisor) {
+uint32_t rgba8888interp(uint32_t color0, uint32_t color1) {
 	unsigned char r, g, b, a;
 	unsigned char r0, g0, b0, a0;
 	unsigned char r1, g1, b1, a1;
@@ -30,10 +30,45 @@ uint32_t rgba8888interp(uint32_t color0, uint32_t color1, char weight, char divi
 	g1 = (color1 & 0x00FF0000) >> 16;
 	b1 = (color1 & 0x0000FF00) >>  8;
 	a1 = (color1 & 0x000000FF) >>  0;
-	r = (weight * r0 + r1) / divisor;
-	g = (weight * g0 + g1) / divisor;
-	b = (weight * b0 + b1) / divisor;
-	a = (weight * a0 + a1) / divisor;
+	r = (2 * r0 + r1 + 1) / 3;
+	g = (2 * g0 + g1 + 1) / 3;
+	b = (2 * b0 + b1 + 1) / 3;
+	a = (2 * a0 + a1 + 1) / 3;
+	return (r << 24) | (g << 16) | (b << 8) | a;
+}
+
+uint16_t rgb565interp2(uint16_t color0, uint16_t color1) {
+	char r, g, b;
+	char r0, g0, b0;
+	char r1, g1, b1;
+	r0 = (color0 & 0xF800) >> 11;
+	g0 = (color0 & 0x07E0) >>  5;
+	b0 = (color0 & 0x001F);
+	r1 = (color1 & 0xF800) >> 11;
+	g1 = (color1 & 0x07E0) >>  5;
+	b1 = (color1 & 0x001F);
+	r = (r0 + r1) / 2;
+	g = (g0 + g1) / 2;
+	b = (b0 + b1) / 2;
+	return (r << 11) | (g << 5) | (b);
+}
+
+uint32_t rgba8888interp2(uint32_t color0, uint32_t color1) {
+	unsigned char r, g, b, a;
+	unsigned char r0, g0, b0, a0;
+	unsigned char r1, g1, b1, a1;
+	r0 = (color0 & 0xFF000000) >> 24;
+	g0 = (color0 & 0x00FF0000) >> 16;
+	b0 = (color0 & 0x0000FF00) >>  8;
+	a0 = (color0 & 0x000000FF) >>  0;
+	r1 = (color1 & 0xFF000000) >> 24;
+	g1 = (color1 & 0x00FF0000) >> 16;
+	b1 = (color1 & 0x0000FF00) >>  8;
+	a1 = (color1 & 0x000000FF) >>  0;
+	r = (r0 + r1) / 2;
+	g = (g0 + g1) / 2;
+	b = (b0 + b1) / 2;
+	a = (a0 + a1) / 2;
 	return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
@@ -57,11 +92,11 @@ char *DXT1toRGB565(char *dataIn, unsigned short width, unsigned short height) {
 			pixels |= (dataIn[chunkIdx+4+2])<< 8;
 			pixels |= (dataIn[chunkIdx+4+3]);
 			if (colors[0] > colors[1]) {
-				colors[2] = rgb565interp(colors[0], colors[1], 2, 3);
-				colors[3] = rgb565interp(colors[1], colors[2], 2, 3);
+				colors[2] = rgb565interp(colors[0], colors[1]);
+				colors[3] = rgb565interp(colors[1], colors[0]);
 			}
 			else {
-				colors[2] = rgb565interp(colors[1], colors[2], 1, 2);
+				colors[2] = rgb565interp2(colors[0], colors[1]);
 				colors[3] = 0;
 			}
 			int xs, ys;
@@ -96,11 +131,11 @@ char *DXT1AtoRGBA8888(unsigned char *dataIn, unsigned short width, unsigned shor
 			pixels |= (dataIn[chunkIdx+4+2])<< 8;
 			pixels |= (dataIn[chunkIdx+4+3]);
 			if (colors[0] > colors[1]) {
-				colors[2] = rgba8888interp(colors[0], colors[1], 2, 3);
-				colors[3] = rgba8888interp(colors[1], colors[2], 2, 3);
+				colors[2] = rgba8888interp(colors[0], colors[1]);
+				colors[3] = rgba8888interp(colors[1], colors[0]);
 			}
 			else {
-				colors[2] = rgba8888interp(colors[1], colors[2], 1, 2);
+				colors[2] = rgba8888interp2(colors[0], colors[1]);
 				colors[3] = 0;
 			}
 			int xs, ys;
