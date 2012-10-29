@@ -3,8 +3,6 @@
 #include <getopt.h>
 #include "libtex.h"
 
-char GlobalVerbosity = 0;
-
 TMTextureCollection *tmTgaRead(FILE *inStream);
 void tmTgaWrite(FILE *outStream, TMTextureCollection *collection);
 TMTextureCollection *tmDdsRead(FILE *inStream);
@@ -29,6 +27,7 @@ int main (int argc, char **argv) {
 	char *outFiles[255];
 	unsigned char inFileIndex = 0;
 	unsigned char outFileIndex = 0;
+	TMLogGlobalLevel = 0;
 	if (argc < 2) {
 		usage(argv[0]);
 	}
@@ -36,16 +35,12 @@ int main (int argc, char **argv) {
 		switch (ch) {
 		case 'v':
 			if (optarg == NULL)
-				GlobalVerbosity++;
+				TMLogGlobalLevel++;
 			else {
 				long v = strtol(optarg, NULL, 0);
 				//TODO: FIXME
 				//printf("%s=%d\n", optarg, v);
-				if (v < 0 || v > 127) {
-					fprintf(stderr, "Verbosity level %ld out of range (0..127)\n", v);
-					return 1;
-				}
-				GlobalVerbosity = (char)v;
+				TMLogSetLevel(v);
 			}
 			break;
 		case 'i':

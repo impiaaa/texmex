@@ -7,6 +7,25 @@
 
 #define max(a, b) ((a < b) ? b : a)
 
+typedef enum TMLogLevel {
+	TMLogLevelQuiet, // Don't use when logging something. Intended to silence all output.
+	TMLogLevelError,
+	TMLogLevelWarning,
+	TMLogLevelInfo,
+	TMLogLevelDebug,
+	TMLogLevelAll // NOT for normal use. Choose one of the above instead.
+} TMLogLevel;
+
+extern TMLogLevel TMLogGlobalLevel;
+
+void TMLogSetLevel(TMLogLevel i);
+void TMLog(TMLogLevel level, char *message, ...);
+
+#define TMLogError(message, ...) TMLog(TMLogLevelError, message, __VA_ARGS__)
+#define TMLogWarning(message, ...) TMLog(TMLogLevelWarning, message, __VA_ARGS__)
+#define TMLogInfo(message, ...) TMLog(TMLogLevelInfo, message, __VA_ARGS__)
+#define TMLogDebug(message, ...) TMLog(TMLogLevelDebug, message, __VA_ARGS__)
+
 typedef struct TMContainerType {
 	const char *name;
 	const char *longname;
