@@ -21,10 +21,10 @@ extern TMLogLevel TMLogGlobalLevel;
 void TMLogSetLevel(TMLogLevel i);
 void TMLog(TMLogLevel level, char *message, ...);
 
-#define TMLogError(message, ...) TMLog(TMLogLevelError, message, __VA_ARGS__)
-#define TMLogWarning(message, ...) TMLog(TMLogLevelWarning, message, __VA_ARGS__)
-#define TMLogInfo(message, ...) TMLog(TMLogLevelInfo, message, __VA_ARGS__)
-#define TMLogDebug(message, ...) TMLog(TMLogLevelDebug, message, __VA_ARGS__)
+#define TMLogError(...) TMLog(TMLogLevelError, __VA_ARGS__)
+#define TMLogWarning(...) TMLog(TMLogLevelWarning, __VA_ARGS__)
+#define TMLogInfo(...) TMLog(TMLogLevelInfo, __VA_ARGS__)
+#define TMLogDebug(...) TMLog(TMLogLevelDebug, __VA_ARGS__)
 
 typedef struct TMContainerType {
 	const char *name;
