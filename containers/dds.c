@@ -82,11 +82,11 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 
 	read = fread(&header, sizeof(TMDDSHeader), 1, inStream);
 	if (read != 1) {
-		fprintf(stderr, "Could not load header\n");
+		TMLogError("Could not load header");
 		return NULL;
 	}
 	if (header.magic != ' SDD') {
-		fprintf(stderr, "Incorrect magic 0x%08X\n", header.magic);
+		TMLogError("Incorrect magic 0x%08X", header.magic);
 		return NULL;
 	}
 	
@@ -127,7 +127,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 					ret->sequences[i]->frames[0]->pixfmt = IA88;
 				}
 				else {
-					fprintf(stderr, "Alpha+luminance bit width %d unsupported\n", header.pixelFormat.rgbBitCount);
+					TMLogError("Alpha+luminance bit width %d unsupported", header.pixelFormat.rgbBitCount);
 					goto fail;
 				}
 			}
@@ -141,7 +141,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 					ret->sequences[i]->frames[0]->pixfmt = A4;
 				}
 				else {
-					fprintf(stderr, "Alpha-only bit width %d unsupported\n", header.pixelFormat.rgbBitCount);
+					TMLogError("Alpha-only bit width %d unsupported", header.pixelFormat.rgbBitCount);
 					goto fail;
 				}
 			}
@@ -152,7 +152,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 				ret->sequences[i]->frames[0]->pixfmt = RGB565;
 			}
 			else {
-				fprintf(stderr, "Unknown FOURCC 0x%08X\n", header.pixelFormat.fourCC);
+				TMLogError("Unknown FOURCC 0x%08X", header.pixelFormat.fourCC);
 				goto fail;
 			}
 		}
@@ -170,7 +170,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 				else if ((header.pixelFormat.rBitMask == 0xf800) && (header.pixelFormat.gBitMask == 0x07e0) && (header.pixelFormat.bBitMask == 0x001f))
 					ret->sequences[i]->frames[0]->pixfmt = RGB565;
 				else {
-					fprintf(stderr, "Unknown 16-bit color format 0x%04X, 0x%04X, 0x%04X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+					TMLogError("Unknown 16-bit color format 0x%04X, 0x%04X, 0x%04X", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
 					goto fail;
 				}
 			}
@@ -181,7 +181,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 				else if ((header.pixelFormat.rBitMask == 0xff0000) && (header.pixelFormat.gBitMask == 0x00ff00) && (header.pixelFormat.bBitMask == 0x0000ff))
 					ret->sequences[i]->frames[0]->pixfmt = RGB888;
 				else {
-					fprintf(stderr, "Unknown 24-bit color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+					TMLogError("Unknown 24-bit color format 0x%06X, 0x%06X, 0x%06X", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
 					goto fail;
 				}
 			}
@@ -192,7 +192,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 						ret->sequences[i]->frames[0]->pixfmt = RGBA8888;
 					}
 					else {
-						fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+						TMLogError("Unknown color format 0x%06X, 0x%06X, 0x%06X", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
 						goto fail;
 					}
 				}
@@ -204,7 +204,7 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 							ret->sequences[i]->frames[0]->pixfmt = BGRX8888;
 					}
 					else {
-						fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+						TMLogError("Unknown color format 0x%06X, 0x%06X, 0x%06X", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
 						goto fail;
 					}
 				}
@@ -214,17 +214,17 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 					else if ((header.pixelFormat.rBitMask == 0x00ff0000) && (header.pixelFormat.gBitMask == 0x0000ff00) && (header.pixelFormat.bBitMask == 0x000000ff))
 						ret->sequences[i]->frames[0]->pixfmt = ARGB8888;
 					else {
-						fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+						TMLogError("Unknown color format 0x%06X, 0x%06X, 0x%06X", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
 						goto fail;
 					}
 				}
 				else {
-					fprintf(stderr, "Unknown color format 0x%06X, 0x%06X, 0x%06X\n", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
+					TMLogError("Unknown color format 0x%06X, 0x%06X, 0x%06X", header.pixelFormat.rBitMask, header.pixelFormat.gBitMask, header.pixelFormat.bBitMask);
 					goto fail;
 				}
 			}
 			else {
-				fprintf(stderr, "Unknown bit width %d\n", header.pixelFormat.rgbBitCount);
+				TMLogError("Unknown bit width %d", header.pixelFormat.rgbBitCount);
 				goto fail;
 			}
 		}
@@ -238,12 +238,12 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 				ret->sequences[i]->frames[0]->pixfmt = I4;
 			}
 			else {
-				fprintf(stderr, "Luminance bit width %d unsupported\n", header.pixelFormat.rgbBitCount);
+				TMLogError("Luminance bit width %d unsupported", header.pixelFormat.rgbBitCount);
 				goto fail;
 			}
 		}
 		else {
-			fprintf(stderr, "Unknown pixel format 0x%08X\n", header.pixelFormat.flags);
+			TMLogError("Unknown pixel format 0x%08X", header.pixelFormat.flags);
 			goto fail;
 		}
 		

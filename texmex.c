@@ -27,7 +27,7 @@ int main (int argc, char **argv) {
 	char *outFiles[255];
 	unsigned char inFileIndex = 0;
 	unsigned char outFileIndex = 0;
-	TMLogGlobalLevel = 0;
+	TMLogGlobalLevel = TMLogLevelError;
 	if (argc < 2) {
 		usage(argv[0]);
 	}
@@ -64,18 +64,18 @@ int main (int argc, char **argv) {
 	for (i = 0; i < inFileIndex; i++) {
 		FILE *inFile = fopen(inFiles[i], "rb");
 		if (inFile == NULL) {
-			fprintf(stderr, "Error opening file: %s\n", inFiles[i]);
+			TMLogError("Error opening file: %s", inFiles[i]);
 			return 1;
 		}
 		TMTextureCollection *tc = tmDdsRead(inFile);
 		if (tc == NULL)
 			continue;
-		printf("%s sequence count: %d\n", inFiles[i], tc->sequenceCount);
+		TMLogDebug("%s sequence count: %d", inFiles[i], tc->sequenceCount);
 		for (j = 0; j < tc->sequenceCount; j++) {
-			printf("  Frame count: %d\n", tc->sequences[j]->frameCount);
+			TMLogDebug("  Frame count: %d", tc->sequences[j]->frameCount);
 			for (k = 0; k < max(1, tc->sequences[j]->frameCount); k++) {
 				TMTexture *tex = tc->sequences[j]->frames[k];
-				printf("    Compression: %08X\n    Pixel format: %d\n    Width: %d\n    Height: %d\n    Depth: %d\n    mipmapCount: %d\n", tex->compression, tex->pixfmt, tex->width, tex->height, tex->depth, tex->mipmapCount);
+				TMLogDebug("    Compression: %08X\n    Pixel format: %d\n    Width: %d\n    Height: %d\n    Depth: %d\n    mipmapCount: %d", tex->compression, tex->pixfmt, tex->width, tex->height, tex->depth, tex->mipmapCount);
 			}
 		}
 		fclose(inFile);
@@ -89,7 +89,7 @@ int main (int argc, char **argv) {
 			tc->sequences[0]->frames[0]->pixfmt = BGRA8888;
 			FILE *outFile = fopen(outFiles[0], "wb");
 			if (outFile == NULL) {
-				fprintf(stderr, "Error opening file: %s\n", outFiles[0]);
+				TMLogError("Error opening file: %s", outFiles[0]);
 				return 1;
 			}
 			tmTgaWrite(outFile, tc);

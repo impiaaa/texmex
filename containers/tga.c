@@ -83,14 +83,14 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 
 	read = fread(&header, sizeof(TMTGAHeader), 1, inStream);
 	if (read != 1) {
-		fprintf(stderr, "Could not load header\n");
+		TMLogError("Could not load header");
 		return NULL;
 	}
 	
 	fseek(inStream, -sizeof(TMTGAFooter), SEEK_END);
 	read = fread(&footer, sizeof(TMTGAFooter), 1, inStream);
 	if (read != 1) {
-		fprintf(stderr, "Could not load footer\n");
+		TMLogError("Could not load footer");
 		return NULL;
 	}
 	
@@ -110,7 +110,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 			return ret;
 		case 1:
 		case 9:
-			fprintf(stderr, "Color-mapped images not supported\n");
+			TMLogError("Color-mapped images not supported");
 			TMFree(ret);
 			return NULL;
 		case 2:
@@ -130,7 +130,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 			isGray = 1;
 			break;
 		default:
-			fprintf(stderr, "Unknown image type, %d\n", header.imageType);
+			TMLogError("Unknown image type, %d", header.imageType);
 			TMFree(ret);
 			return NULL;
 	}
@@ -155,7 +155,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 				tex->pixfmt = I8;
 				break;
 			default:
-				fprintf(stderr, "Grayscale not supported with pixel depth %d\n", header.imageSpecification.pixelDepth);
+				TMLogError("Grayscale not supported with pixel depth %d", header.imageSpecification.pixelDepth);
 				TMFree(ret);
 				TMFree(seq);
 				TMFree(tex);
@@ -174,7 +174,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 				tex->pixfmt = BGRA8888;
 				break;
 			default:
-				fprintf(stderr, "pixel depth %d not supported\n", header.imageSpecification.pixelDepth);
+				TMLogError("pixel depth %d not supported", header.imageSpecification.pixelDepth);
 				TMFree(ret);
 				TMFree(seq);
 				TMFree(tex);
@@ -208,7 +208,7 @@ TMTextureCollection *tmTgaRead(FILE *inStream) {
 		}
 		else {
 			ret->thumbnail = NULL;
-			fprintf(stderr, "Could not load extension area\n");
+			TMLogError("Could not load extension area");
 		}
 	}
 	return ret;
@@ -227,7 +227,7 @@ void tmTgaWrite(FILE *outStream, TMTextureCollection *collection) {
 		header.imageType = 2;
 	}
 	else {
-		fprintf(stderr, "Unsupported pixfmt %d\n", collection->sequences[0]->frames[0]->pixfmt);
+		TMLogError("Unsupported pixfmt %d", collection->sequences[0]->frames[0]->pixfmt);
 		return;
 	}
 	
@@ -256,21 +256,21 @@ void tmTgaWrite(FILE *outStream, TMTextureCollection *collection) {
 			header.imageSpecification.pixelDepth = 32;
 			break;
 		default:
-			fprintf(stderr, "Insane condition\n");
+			TMLogError("Insane condition");
 			return;
 	}
 	header.imageSpecification.imageDescriptor = 0x28;
 	
 	wrote = fwrite(&header, sizeof(TMTGAHeader), 1, outStream);
 	if (wrote != 1) {
-		fprintf(stderr, "Could not write header\n");
+		TMLogError("Could not write header");
 		return;
 	}
 	
 	unsigned long imageDataSize = (collection->sequences[0]->frames[0]->width*collection->sequences[0]->frames[0]->height*header.imageSpecification.pixelDepth)>>3;
 	wrote = fwrite(collection->sequences[0]->frames[0]->mipmaps, imageDataSize, 1, outStream);
 	if (wrote != 1) {
-		fprintf(stderr, "Could not write image data\n");
+		TMLogError("Could not write image data");
 		return;
 	}
 }
