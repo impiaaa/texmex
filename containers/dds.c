@@ -151,6 +151,22 @@ TMTextureCollection *tmDdsRead(FILE *inStream) {
 				ret->sequences[i]->frames[0]->compression = DXT1;
 				ret->sequences[i]->frames[0]->pixfmt = RGB565;
 			}
+			else if (header.pixelFormat.fourCC == '2TXD') {
+				ret->sequences[i]->frames[0]->compression = DXT2;
+				ret->sequences[i]->frames[0]->pixfmt = RGB565;
+			}
+			else if (header.pixelFormat.fourCC == '3TXD') {
+				ret->sequences[i]->frames[0]->compression = DXT3;
+				ret->sequences[i]->frames[0]->pixfmt = RGB565;
+			}
+			else if (header.pixelFormat.fourCC == '4TXD') {
+				ret->sequences[i]->frames[0]->compression = DXT4;
+				ret->sequences[i]->frames[0]->pixfmt = RGB565;
+			}
+			else if (header.pixelFormat.fourCC == '5TXD') {
+				ret->sequences[i]->frames[0]->compression = DXT5;
+				ret->sequences[i]->frames[0]->pixfmt = RGB565;
+			}
 			else {
 				TMLogError("Unknown FOURCC 0x%08X", header.pixelFormat.fourCC);
 				goto fail;

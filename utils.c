@@ -13,21 +13,21 @@ void TMLogSetLevel(TMLogLevel i) {
 	}
 }
 
-void TMLog(TMLogLevel level, char *message, ...) {
+void TMLog(TMLogLevel level, char *file, unsigned long line, char *message, ...) {
 	if (level > TMLogGlobalLevel)
 		return;
 	switch (level) {
 		case TMLogLevelError:
-			fprintf(stderr, "%s", "[ERROR] ");
+			fprintf(stderr, "[%s] %s:%d: ", "ERROR", file, line);
 			break;
 		case TMLogLevelWarning:
-			fprintf(stderr, "%s", "[WARNING] ");
+			fprintf(stderr, "[%s] %s:%d: ", "WARNING", file, line);
 			break;
 		case TMLogLevelInfo:
-			fprintf(stderr, "%s", "[INFO] ");
+			fprintf(stderr, "[%s] %s:%d: ", "INFO", file, line);
 			break;
 		case TMLogLevelDebug:
-			fprintf(stderr, "%s", "[DEBUG] ");
+			fprintf(stderr, "[%s] %s:%d: ", "DEBUG", file, line);
 			break;
 		default:
 			return;

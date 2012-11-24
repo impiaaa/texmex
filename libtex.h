@@ -19,12 +19,12 @@ typedef enum TMLogLevel {
 extern TMLogLevel TMLogGlobalLevel;
 
 void TMLogSetLevel(TMLogLevel i);
-void TMLog(TMLogLevel level, char *message, ...);
+void TMLog(TMLogLevel level, char *file, unsigned long line, char *message, ...);
 
-#define TMLogError(...) TMLog(TMLogLevelError, __VA_ARGS__)
-#define TMLogWarning(...) TMLog(TMLogLevelWarning, __VA_ARGS__)
-#define TMLogInfo(...) TMLog(TMLogLevelInfo, __VA_ARGS__)
-#define TMLogDebug(...) TMLog(TMLogLevelDebug, __VA_ARGS__)
+#define TMLogError(...) TMLog(TMLogLevelError, __FILE__, __LINE__, __VA_ARGS__)
+#define TMLogWarning(...) TMLog(TMLogLevelWarning, __FILE__, __LINE__, __VA_ARGS__)
+#define TMLogInfo(...) TMLog(TMLogLevelInfo, __FILE__, __LINE__, __VA_ARGS__)
+#define TMLogDebug(...) TMLog(TMLogLevelDebug, __FILE__, __LINE__, __VA_ARGS__)
 
 typedef struct TMContainerType {
 	const char *name;
