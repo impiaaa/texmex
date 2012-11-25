@@ -6,13 +6,6 @@
 #include <string.h>
 #include <stdint.h>
 
-TMContainerType tmDdsContainer = {
-	.name = "dds",
-	.longname = "DirectDraw Surface (DDS)",
-	.mime_types = "image/x-dds",
-	.extensions = "dds"
-};
-
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb943991(v=vs.85).aspx
 
 enum TMDDSFlags {

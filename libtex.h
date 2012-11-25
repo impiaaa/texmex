@@ -31,6 +31,7 @@ typedef struct TMContainerType {
 	const char *longname;
 	const char *mime_types; // comma-separated
 	const char *extensions; // comma-separated
+	TMTextureCollection * reader; // function pointer
 } TMContainerType;
 
 typedef struct TMTexture {
