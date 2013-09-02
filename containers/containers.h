@@ -5,12 +5,8 @@
 #include <stdio.h>
 
 TMTextureCollection *tmDdsRead(FILE *inStream);
-TMContainerType tmDdsContainer = {
-	.name = "dds",
-	.longname = "DirectDraw Surface (DDS)",
-	.mime_types = "image/x-dds",
-	.extensions = "dds",
-	.reader = tmDdsRead
-};
+extern TMContainerType tmDdsContainer;
+extern TMContainerType tmTgaContainer;
+extern TMContainerType *tmAllContainers[];
 
 #endif // TM_CONTAINER_H

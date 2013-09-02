@@ -26,14 +26,6 @@ void TMLog(TMLogLevel level, char *file, unsigned long line, char *message, ...)
 #define TMLogInfo(...) TMLog(TMLogLevelInfo, __FILE__, __LINE__, __VA_ARGS__)
 #define TMLogDebug(...) TMLog(TMLogLevelDebug, __FILE__, __LINE__, __VA_ARGS__)
 
-typedef struct TMContainerType {
-	const char *name;
-	const char *longname;
-	const char *mime_types; // comma-separated
-	const char *extensions; // comma-separated
-	TMTextureCollection * reader; // function pointer
-} TMContainerType;
-
 typedef struct TMTexture {
 	TMCompressionType compression;
 	TMPixelFormat pixfmt;
@@ -64,6 +56,14 @@ typedef struct TMTextureCollection {
 	unsigned short sequenceCount; // some files have multiple textures, or faces for a cubemap
 	TMSequence **sequences; // array of pointers
 } TMTextureCollection;
+
+typedef struct TMContainerType {
+	const char *name;
+	const char *longname;
+	const char *mime_types; // comma-separated
+	const char *extensions; // comma-separated
+	TMTextureCollection * reader; // function pointer
+} TMContainerType;
 
 #define TMCalloc calloc
 #define TMFree free

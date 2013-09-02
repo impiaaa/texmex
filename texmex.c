@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include "libtex.h"
+#include "containers/containers.h"
 
 TMTextureCollection *tmTgaRead(FILE *inStream);
 void tmTgaWrite(FILE *outStream, TMTextureCollection *collection);
@@ -9,8 +10,9 @@ TMTextureCollection *tmDdsRead(FILE *inStream);
 char *DXT1AtoRGBA8888(unsigned char *dataIn, unsigned short width, unsigned short height);
 
 void usage(char *execname) {
-	fprintf(stderr, "Usage:\n"
-			"\t%s: [vh] [-i infile]... [-o outfile]...\n",
+	fprintf(stderr,
+			"Usage:\n"
+			"  %s: [vh] [-i infile]... [-o outfile]...\n",
 			execname);
 }
 
@@ -19,7 +21,10 @@ int main (int argc, char **argv) {
 		{"verbose", optional_argument, NULL, 'v'},
 		{"in", required_argument, NULL, 'i'},
 		{"out", required_argument, NULL, 'o'},
-		{"help", required_argument, NULL, 'h'},
+		{"help", no_argument, NULL, 'h'},
+		{"containers", no_argument, NULL, 'n'},
+		{"compression", no_argument, NULL, 'm'},
+		{"pixfmts", no_argument, NULL, 'p'},
 		{NULL, 0, NULL, 0}
 	};
 	int ch;
@@ -55,6 +60,14 @@ int main (int argc, char **argv) {
 		case '?':
 			usage(argv[0]);
 			return 0;
+		case 'n': {
+			int i = 0;
+			while (tmAllContainers[i] != NULL) {
+				printf("%s\n", tmAllContainers[i]->longname);
+				i++;
+			}
+			return 0;
+			}
 		default:
 			break;
 		}

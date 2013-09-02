@@ -8,6 +8,14 @@
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb943991(v=vs.85).aspx
 
+TMContainerType tmDdsContainer = {
+	.name = "dds",
+	.longname = "DirectDraw Surface (DDS)",
+	.mime_types = "image/x-dds",
+	.extensions = "dds",
+	.reader = tmDdsRead
+};
+
 enum TMDDSFlags {
 	TMDDS_CAPS = 0x1,
 	TMDDS_HEIGHT = 0x2,
